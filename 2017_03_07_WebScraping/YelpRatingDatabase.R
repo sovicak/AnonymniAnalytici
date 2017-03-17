@@ -1,4 +1,4 @@
-### getting list of restaurant with rating and URL
+### getting list of restaurants with rating and URL
 
 install.packages("rvest")
 library(rvest)
