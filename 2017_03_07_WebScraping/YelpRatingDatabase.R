@@ -18,14 +18,14 @@ while(i <= 1020)
     ### Get actual URL
     Yelp <- read_html(PageURL)
     
-    ### Get Name, URL and Rating of restaurant
+    ### Get Name, URL and Rating of restaurants
     Names  <- html_nodes(Yelp,".column-alpha .main-attributes span a")
     URL    <- paste("https://www.yelp.cz/",as.character(html_attr(Names,"href")),sep="")
     Rating <- html_attr(html_nodes((html_nodes(Yelp,"div.biz-rating.biz-rating-large.clearfix")),'img.offscreen'),'alt')
     Names  <- encodeString(html_text(Names),"UTF-8")
     YelpDatabase <- cbind(Names,URL,Rating)
     
-    ### Explore set
+    ### Explore dataset
     head(YelpDatabase)
     str(YelpDatabase)
     
