@@ -24,9 +24,10 @@ while(i <= 1020)
     Rating <- html_attr(html_nodes((html_nodes(Yelp,"div.biz-rating.biz-rating-large.clearfix")),'img.offscreen'),'alt')
     Names  <- encodeString(html_text(Names),"UTF-8")
     YelpDatabase <- cbind(Names,URL,Rating)
-    
-    ### Explore dataset
-    head(YelpDatabase)
-    str(YelpDatabase)
+
     
 }
+
+ ### Explore dataset
+ head(YelpDatabase)
+ str(YelpDatabase)
