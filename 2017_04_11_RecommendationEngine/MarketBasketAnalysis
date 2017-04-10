@@ -1,0 +1,141 @@
+---------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------- Asociacni pravidla ----------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+--- Transakce za posledni rok pro napocet pravidel
+
+CREATE TABLE dbo.MarketBasketBase
+( 
+  Document_ID INT,
+  Product_ID INT
+)
+EXEC sp_addextendedproperty N'MS_Description', N'Záznamy o zákaznických transakcích.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketBase', NULL, NULL
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'ID dokladu/ transakce.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketBase', 'COLUMN', N'Document_ID'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'ID produktu.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketBase', 'COLUMN', N'Product_ID'
+GO
+;
+
+
+INSERT dbo.MarketBasketBase
+SELECT 
+  Document_ID,
+  Product_ID
+FROM 
+  .....
+WHERE
+  ....
+
+--- Vypocet asociacních pravidel za celek 
+
+IF OBJECT_ID('tempdb..#AssociationRules') IS NOT NULL DROP TABLE #AssociationRules;
+CREATE TABLE #AssociationRules
+(
+  rules NVARCHAR(MAX),
+  support FLOAT, 
+  confidence FLOAT, 
+  lift  FLOAT,
+  phi  FLOAT,
+  gini FLOAT
+)
+
+--- koupeno alespon 5x a z toho alespon z poloviny spolecne, jen pravidla o delce >= 2 
+INSERT INTO  #AssociationRules
+EXECUTE sp_execute_external_script    
+  @language = N'R'    
+  , @script = N'   
+    library(arules); 
+    library(Matrix);
+    data <- InputDataSet;    
+    dt <- split(data[,2], data[,1]);
+    dt2 = as(dt,"transactions");
+    rules = apriori(dt2, parameter=list(support=5/nrow(dt2), confidence=0.5,minlen = 2));
+    quality(rules)<-cbind(quality(rules),interestMeasure(rules,measure = c("phi","gini"),trans=dt2));
+    rulesDF <- as(rules, "data.frame")
+    rulesDF$rules=gsub("\\{", "", rulesDF$rules)
+    rulesDF$rules=gsub("\\}", "", rulesDF$rules)
+    rulesDF$rules=gsub("\"", "", rulesDF$rules)
+  OutputDataSet <- rulesDF;'    
+ , @input_data_1 = N'select * from dbo.MarketBasketBase' ,   
+   @output_data_1_name = N'OutputDataSet'
+GO
+
+
+
+---- uprava pravidel pro dalsi praci
+
+CREATE TABLE dbo.MarketBasketRules
+( 
+   [Rule] VARCHAR(250),
+   Support  FLOAT ,
+   Confidence FLOAT,
+   Lift FLOAT,
+   Phi FLOAT,
+   Gini FLOAT,
+   Lhs VARCHAR(250),
+   Rhs VARCHAR(250),
+   ParseLhs VARCHAR(250),
+   RulesLenght INT,
+   rule_ID BIGINT
+)
+EXEC sp_addextendedproperty N'MS_Description', N'Seznam pravidel - duplikované pres jednotlive polozky leve strany pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', NULL, NULL
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Pravidlo.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Rule'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Support pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Support'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Confidence pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Confidence'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Lift pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Lift'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Gini pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Gini'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Levá strana pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Lhs'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Pravá strana pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'Rhs'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Dilci produkt leve casti pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'ParseLhs'
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Pocet produktu na leve strane pravidla.', 'SCHEMA', N'dbo', 'TABLE', N'MarketBasketRules', 'COLUMN', N'RulesLenght'
+GO
+;
+
+---uprava
+;WITH CTE_Parse AS 
+(
+  SELECT 
+    AR.rules ,
+    AR.support ,
+    AR.confidence ,
+    AR.lift ,
+    AR.phi ,
+    AR.gini,
+    SUBSTRING(rules,1, CHARINDEX('=>',rules,1)-2) AS lhs,
+    SUBSTRING(rules,CHARINDEX('=>',rules,1)+3,LEN(rules)-CHARINDEX('=>',rules,1)-2)  AS rhs,
+    [value] as parselhs,
+    COUNT(1) OVER (PARTITION BY AR.rules) AS productNoRules,
+    0 + DENSE_RANK() OVER (ORDER BY AR.rules) AS rule_ID
+  FROM 
+    #AssociationRules AS AR
+    CROSS APPLY string_split(SUBSTRING(rules,1, CHARINDEX('=>',rules,1)-2),',')
+ )
+  INSERT INTO dbo.MarketBasketRules
+  SELECT
+    P.rules ,
+    P.support ,
+    P.confidence ,
+    P.lift ,
+    P.phi ,
+    P.gini ,
+    P.lhs ,
+    P.rhs ,
+    P.parselhs,
+    P.productNoRules,
+    P.rule_ID
+  FROM   
+    CTE_Parse AS P
+
+	  
+---- logicka ocisteni + napojeni na databazi a urceni doporucenych produktu
