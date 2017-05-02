@@ -47,3 +47,29 @@ write.csv(OutputDataSet,"OutputDataSet.csv")
 
 head(OutputDataSet)
 inspect(OutputDataSet)
+
+###Merge data with nodes information
+dataClusters <- read.csv("clustered_items.csv",sep = ";", stringsAsFactors = F)
+head(dataClusters)  
+str(dataClusters)
+names(dataClusters) <- c("node","cluster","Description")
+
+dataNodesMerge <- merge(x = by_CustomerProd, y = dataClusters[,c("node","Description")], key = "Description", all.x = TRUE)
+head(dataNodesMerge)
+dataAR <- data.frame(sqldf("select distinct CustomerID,node from dataNodesMerge"))
+head(dataAR)
+
+
+top.support <- sort(rules, decreasing = TRUE, na.last = NA, by = "support")
+inspect(head(top.support, 10))
+
+
+top.confidence <- sort(rules, decreasing = TRUE, na.last = NA, by = "confidence")
+inspect(head(top.confidence, 10))
+
+top.lift <- sort(rules, decreasing = TRUE, na.last = NA, by = "lift")
+inspect(head(top.lift, 10))
+
+inspect(rules[1:50])
+plot(rules[1:20], method="graph", control=list(type="items"))
+
