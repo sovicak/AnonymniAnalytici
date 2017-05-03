@@ -60,12 +60,12 @@ plot(rulesNodes[1:20], method="graph", control=list(type="items"))
 
 top.support <- sort(rulesNodes, decreasing = TRUE, na.last = NA, by = "support")
 inspect(head(top.support, 10))
-plot(rules[1:10], method="graph", control=list(type="items"))
+plot(rulesNodes[1:10], method="graph", control=list(type="items"))
 
 top.confidence <- sort(rulesNodes, decreasing = TRUE, na.last = NA, by = "confidence")
 inspect(head(top.confidence, 10))
-plot(rules[1:10], method="graph", control=list(type="items"))
+plot(rulesNodes[1:10], method="graph", control=list(type="items"))
 
 top.lift <- sort(rulesNodes, decreasing = TRUE, na.last = NA, by = "lift")
 inspect(head(top.lift, 10))
-plot(rules[1:10], method="graph", control=list(type="items"))
+plot(rulesNodes[1:10], method="graph", control=list(type="items"))
