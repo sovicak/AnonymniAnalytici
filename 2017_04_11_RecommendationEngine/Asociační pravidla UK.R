@@ -56,7 +56,7 @@ names(dataClusters) <- c("node","cluster","Description")
 
 dataNodesMerge <- merge(x = by_CustomerProd, y = dataClusters[,c("node","Description")], key = "Description", all.x = TRUE)
 head(dataNodesMerge)
-dataAR <- data.frame(sqldf("select distinct CustomerID,node from dataNodesMerge"))
+dataAR <- data.frame(sqldf("select distinct InvoiceNo,node from dataNodesMerge"))
 head(dataAR)
 
 
