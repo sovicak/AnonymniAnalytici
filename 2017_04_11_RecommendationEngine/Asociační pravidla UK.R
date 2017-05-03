@@ -22,9 +22,7 @@ DataUK <- data[data$Country == "United Kingdom" & data$Description != "POSTAGE",
 head(DataUK)
 
 #Prepare data
-data <- by_CustomerProd[,c(1:2)]
-head(data)
-dt <- split(data[,1], data[,2]);
+dt <- split(DataUK[,1], DataUK[,2]);
 dt2 = as(dt,"transactions");
 rules = apriori(dt2, parameter=list(support=10/nrow(dt2), confidence=0.8,minlen = 2));
 
@@ -48,7 +46,7 @@ head(dataClusters)
 str(dataClusters)
 names(dataClusters) <- c("node","cluster","Description")
 
-dataNodesMerge <- merge(x = by_CustomerProd, y = dataClusters[,c("node","Description")], key = "Description", all.x = TRUE)
+dataNodesMerge <- merge(x = DataUK, y = dataClusters[,c("node","Description")], key = "Description", all.x = TRUE)
 head(dataNodesMerge)
 dataAR <- data.frame(sqldf("select distinct InvoiceNo,node from dataNodesMerge"))
 head(dataAR)
