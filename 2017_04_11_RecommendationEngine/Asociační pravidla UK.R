@@ -53,7 +53,7 @@ head(dataAR)
 
 dtNodes <- split(dataAR[,2], dataAR[,1]);
 dtNodes2 = as(dtNodes,"transactions");
-rulesNodes = apriori(dtNodes2, parameter=list(support=10/nrow(dtNodes2), confidence=0.8,minlen = 2));
+rulesNodes = apriori(dtNodes2, parameter=list(support=100/nrow(dtNodes2), confidence=0.8,minlen = 2));
 
 inspect(rulesNodes[1:50])
 plot(rulesNodes[1:20], method="graph", control=list(type="items"))
