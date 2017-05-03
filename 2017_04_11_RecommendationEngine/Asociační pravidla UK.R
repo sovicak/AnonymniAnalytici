@@ -18,7 +18,7 @@ str(data)
 unique(data$Country)
 table(data$Country)
 
-DataUK <- data[data$Country == "United Kingdom",]
+DataUK <- data[data$Country == "United Kingdom" & data$Description != "POSTAGE",c("InvoiceNo","Description")]
 head(DataUK)
 
 ### Remove claims
