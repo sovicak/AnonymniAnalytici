@@ -1,0 +1,6 @@
+*.Rhistory
+2017_04_11_RecommendationEngine/SOM/Online Retail.xlsx
+*.RData
+2017_04_11_RecommendationEngine/SOM/clustered_items.csv
+*.png
+*.pptx
