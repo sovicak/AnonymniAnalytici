@@ -6,7 +6,7 @@ library(lubridate);
 library(reshape2);
 library(arulesViz);
 
-setwd(".....")
+setwd("D:\\Work&Education\\Anonymní Analytici\\20170411 Recommendation engine\\")
 data <- read.csv("OnlineRetail.csv",sep = ",", stringsAsFactors = F)
 data$InvoiceDate <- as.Date(data$InvoiceDate, "%m/%d/%y")
 data$InvoiceNo[is.na(data$InvoiceNo)] <- "Claim"
@@ -22,7 +22,7 @@ DataUK <- data[data$Country == "United Kingdom" & data$Description != "POSTAGE",
 head(DataUK)
 
 #Prepare data
-dt <- split(DataUK[,1], DataUK[,2]);
+dt <- split(DataUK[,2], DataUK[,1]);
 dt2 = as(dt,"transactions");
 rules = apriori(dt2, parameter=list(support=10/nrow(dt2), confidence=0.8,minlen = 2));
 
@@ -45,23 +45,27 @@ dataClusters <- read.csv("clustered_items.csv",sep = ";", stringsAsFactors = F)
 head(dataClusters)  
 str(dataClusters)
 names(dataClusters) <- c("node","cluster","Description")
+head(DataUK)
 
-dataNodesMerge <- merge(x = DataUK, y = dataClusters[,c("node","Description")], key = "Description", all.x = TRUE)
-head(dataNodesMerge)
-dataAR <- data.frame(sqldf("select distinct InvoiceNo,node from dataNodesMerge"))
+dataNodesMerge <- merge(x = DataUK, y = dataClusters[dataClusters$node != 268 ,c("node","Description")], key = "Description", x.all = TRUE)
+dataAR <- data.frame(sqldf("select distinct InvoiceNo, node from dataNodesMerge"))
 head(dataAR)
 
+dtNodes <- split(dataNodesMerge[,1], dataNodesMerge[,2]);
+dtNodes2 = as(dtNodes,"transactions");
+rulesNodes = apriori(dtNodes2, parameter=list(support=10/nrow(dtNodes2), confidence=0.8,minlen = 2));
 
-top.support <- sort(rules, decreasing = TRUE, na.last = NA, by = "support")
+inspect(rulesNodes[1:50])
+plot(rulesNodes[1:20], method="graph", control=list(type="items"))
+
+top.support <- sort(rulesNodes, decreasing = TRUE, na.last = NA, by = "support")
 inspect(head(top.support, 10))
+plot(rules[1:10], method="graph", control=list(type="items"))
 
-
-top.confidence <- sort(rules, decreasing = TRUE, na.last = NA, by = "confidence")
+top.confidence <- sort(rulesNodes, decreasing = TRUE, na.last = NA, by = "confidence")
 inspect(head(top.confidence, 10))
+plot(rules[1:10], method="graph", control=list(type="items"))
 
-top.lift <- sort(rules, decreasing = TRUE, na.last = NA, by = "lift")
+top.lift <- sort(rulesNodes, decreasing = TRUE, na.last = NA, by = "lift")
 inspect(head(top.lift, 10))
-
-inspect(rules[1:50])
-plot(rules[1:20], method="graph", control=list(type="items"))
-
+plot(rules[1:10], method="graph", control=list(type="items"))
