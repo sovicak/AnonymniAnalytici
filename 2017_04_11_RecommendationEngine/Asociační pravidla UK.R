@@ -6,7 +6,7 @@ library(lubridate);
 library(reshape2);
 library(arulesViz);
 
-setwd("D:\\Work&Education\\Anonymní Analytici\\20170411 Recommendation engine\\")
+setwd(".....\\")
 data <- read.csv("OnlineRetail.csv",sep = ",", stringsAsFactors = F)
 data$InvoiceDate <- as.Date(data$InvoiceDate, "%m/%d/%y")
 data$InvoiceNo[is.na(data$InvoiceNo)] <- "Claim"
@@ -51,7 +51,7 @@ dataNodesMerge <- merge(x = DataUK, y = dataClusters[dataClusters$node != 268 ,c
 dataAR <- data.frame(sqldf("select distinct InvoiceNo, node from dataNodesMerge"))
 head(dataAR)
 
-dtNodes <- split(dataNodesMerge[,1], dataNodesMerge[,2]);
+dtNodes <- split(dataAR[,2], dataAR[,1]);
 dtNodes2 = as(dtNodes,"transactions");
 rulesNodes = apriori(dtNodes2, parameter=list(support=10/nrow(dtNodes2), confidence=0.8,minlen = 2));
 
