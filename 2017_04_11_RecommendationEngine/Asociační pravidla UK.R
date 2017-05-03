@@ -21,12 +21,6 @@ table(data$Country)
 DataUK <- data[data$Country == "United Kingdom" & data$Description != "POSTAGE",c("InvoiceNo","Description")]
 head(DataUK)
 
-### Remove claims
-by_CustomerProd <- data.frame(group_by(DataUK, Description, CustomerID) 
-                              %>% summarise(QuantitySum=sum(Quantity))
-                              %>% filter(QuantitySum > 0 & Description != "POSTAGE"))
-
-
 #Prepare data
 data <- by_CustomerProd[,c(1:2)]
 head(data)
