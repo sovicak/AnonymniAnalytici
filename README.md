@@ -8,9 +8,9 @@ Přehled sezení, která za sebou mají Anonymní Analytici:
 
 [7. 3. 2017 Web Scraping](http://www.anonymni-analytici.cz/2017/03/20/7-3-2017-web-scraping/)
 
-[11. 4. 2017 Doporučovací pravidla] (http://www.anonymni-analytici.cz/2017/05/03/11-4-2017-doporucovaci-pravidla/)
+[11. 4. 2017 Doporučovací pravidla](http://www.anonymni-analytici.cz/2017/05/03/11-4-2017-doporucovaci-pravidla/)
 
 
 # Kontakt
 
-Najdete nás na [blogu] (http://www.anonymni-analytici.cz/) a na [Facebooku](https://www.facebook.com/groups/AnonymniAnalytici/).
+Najdete nás na [blogu](http://www.anonymni-analytici.cz/) a na [Facebooku](https://www.facebook.com/groups/AnonymniAnalytici/).
