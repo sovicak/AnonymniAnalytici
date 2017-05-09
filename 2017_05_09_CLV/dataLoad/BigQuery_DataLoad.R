@@ -17,8 +17,10 @@ list_tables(project, dataset = "clv_aa")
 
 # DATA LOAD
 
-sql = "select * from [clv-research-paveljasek:clv_aa.clv_transactions_input]"
-data_df = query_exec(sql, project = project, max_pages = Inf)
+#sql = "select * from [clv-research-paveljasek:clv_aa.clv_transactions_input]"
+#data_df = query_exec(sql, project = project, max_pages = Inf)
+
+data_df = list_tabledata("clv-research-paveljasek", "clv_aa", "clv_transactions_input", max_pages = Inf)
 
 head(data_df, n = 10)
 hist(data_df$profit, xlim = c(0, 3000), breaks = 500)
