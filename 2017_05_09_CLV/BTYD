@@ -1,1 +1,96 @@
 
+# LOADING DATA FROM BIGQUERY
+
+install.packages("bigrquery")
+install.packages("data.table")
+install.packages("ggplot2")
+install.packages("BTYD")
+install.packages("lubridate")
+
+library("bigrquery")
+library("data.table")
+library("ggplot2")
+library("BTYD")
+library("lubridate")
+
+# List available projects, datasets and tables
+list_projects() # This asks you to authorize bigrquery in the browser
+project = "clv-research-paveljasek"
+list_datasets(project)
+
+# DATA LOAD
+data_df = list_tabledata("clv-research-paveljasek", "clv_aa", "clv_transactions_input", max_pages = Inf)
+head(data_df, n = 10)
+str(data_df)
+
+# Choose only columns needed for analysis
+elog<-data_df[,c("customer","date","profit")]                   
+# Give them names that BTYD functions expect  
+names(elog) <- c("cust","date","sales")
+str(elog)
+
+# format date
+elog$date <- as.Date(as.character(elog$date), format="%Y-%m-%d")
+
+# merge all transactions that occurred on the same day -> one transaction per customer per day
+elog <- dc.MergeTransactionsOnSameDate(elog)
+
+# divide the data up into a calibration period and a test period
+end.of.cal.period <- max(elog$date)-dyears(1)
+elog.cal <- elog[which(elog$date <= end.of.cal.period), ]
+
+# using function dc.SplitUpElogForRepeatTrans, which returns a filtered event log without first transactions ($repeat.trans.elog) and saving important information about each customer using to compute recency parameter ($cust.data).
+split.data <- dc.SplitUpElogForRepeatTrans(elog.cal); # remove customer thatt didn't make any repeat transactions
+clean.elog <- split.data$repeat.trans.elog;
+
+# Create a customer-by-time matrix - row = customer,  column = date - using Frequency—each matrix. Matrix entry will contain the number of transactions made by that customer on that day.
+freq.cbt <- dc.CreateFreqCBT(clean.elog);
+# inspect result
+freq.cbt[1:3,1:5]
+
+
+# create a customer-by-time matrix using all transactions
+tot.cbt <- dc.CreateFreqCBT(elog)
+#merge the filtered CBT with this total CBT
+cal.cbt <- dc.MergeCustomers(tot.cbt, freq.cbt)
+
+# customer- frequency, recency and the total time for which they were observed
+# customer-by-time matrix, starting and ending dates for each customer
+birth.periods <- split.data$cust.data$birth.per
+last.dates <- split.data$cust.data$last.date
+cal.cbs.dates <- data.frame(birth.periods, last.dates,
+                            end.of.cal.period)
+# create customer-bysufficient-statistic matrix
+cal.cbs <- dc.BuildCBSFromCBTAndDates(cal.cbt, cal.cbs.dates,
+                                      per="week")
+# Explore result
+cal.cbs[1:3,1:3]
+# x = number of repeat transactions the customer made in the calibration period, or a vector of calibration period transaction frequencies
+# t.x = recency
+# T.cal = total time observed
+
+# parameter estimation
+#  (1,1,1,1) is used as default starting parameters if none are provided
+#params <- pnbd.EstimateParameters(cal.cbs);
+
+
+
+# r          gamma parameter for NBD transaction 
+# alpha      gamma parameter for NBD transaction 
+# s          gamma parameter for Pareto (exponential gamma) dropout process
+# beta       gammma parameter for Pareto (exponential gamma) dropout process
+
+
+# compress matrices
+compress <- pnbd.compress.cbs(cal.cbs,rounding = 1)
+
+# set parameter 
+r <- 1.74
+alpha <- 37.5*7
+s <- 0.18
+beta <- 0.167*7
+param <- c(r,alpha,s,beta)
+
+
+params <- pnbd.EstimateParameters(compress,param);
+params
