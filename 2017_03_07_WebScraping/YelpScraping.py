@@ -140,7 +140,7 @@ for index, row in companies.iterrows():
         
         print('Getting company reviews from page %d.' % bizPageCount)
         
-        nextBizAdd = baseUrl + bizPageCount.get('href')
+        nextBizAdd = bizNextButton.get('href')
         
         bizPage_prep = urllib.request.Request(nextBizAdd)
         bizPage_prep.add_header('User-Agent', random.choice(userAgents))
@@ -151,12 +151,17 @@ for index, row in companies.iterrows():
         
         allRev = bizSoup.find_all('div', {'itemprop': 'review'})
         
+        if (len(allRev) == 0):
+            
+            print("Empty results.")
+            break
+            
         for span in allRev:
             i = reviews.shape[0]
             reviews.loc[i, 'company'] = companies['name'][index]
-            reviews.loc[i, 'text'] = review.find('p').get_text()
-            reviews.loc[i, 'stars'] = review.find('meta', {'itemprop': 'ratingValue'}).get('content') 
+            reviews.loc[i, 'text'] = span.find('p').get_text()
+            reviews.loc[i, 'stars'] = span.find('meta', {'itemprop': 'ratingValue'}).get('content') 
             
-        bizNextButton = soup.find('a', {'class': 'u-decoration-none next pagination-links_anchor'}) # otestovat
+        bizNextButton = bizSoup.find('a', {'class': 'u-decoration-none next pagination-links_anchor'}) # otestovat
         bizPageCount += 1
 
