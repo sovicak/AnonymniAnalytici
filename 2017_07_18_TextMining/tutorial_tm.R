@@ -5,7 +5,6 @@ library(tm)
 library(tm.corpus.Reuters21578)
 library(wordcloud)
 
-
 # DATA LOAD
 
 # Reuters data set is ready in VCorpus format. However;
@@ -122,3 +121,28 @@ wordcloud(freq2$terms, freq2$freq, max.words = 100, random.order = FALSE) # weig
 
 wordcloud(corp[meta(corp, "earn") ==  "yes"], max.words = 100, random.order = FALSE) # weighting tf (earn topic only)
 
+#LDA (Latent Dirichlet Allocation - unstuctured topic identification)
+library(topicmodels)
+
+neco_lda <- LDA(dtm, k = 7)  #actual LDA calculation
+
+library(tidytext)
+
+neco_topics <- tidy(neco_lda, matrix = "beta")
+neco_topics
+
+library(ggplot2)
+library(dplyr)
+
+neco_top_terms <- neco_topics %>%   #plot to n terms for each topic
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+neco_top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
