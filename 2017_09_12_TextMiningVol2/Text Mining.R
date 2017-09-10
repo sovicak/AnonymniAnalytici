@@ -2,14 +2,14 @@ library(data.table)
 library(tm)
 
 # path to the folder where the data is
-path <- "C:\\"
+path <- "D:\\Work&Education\\Anonymní Analytici\\20170718 Text mining"
 setwd(path)
 dir()
 
 # DATA LOAD
 
 # Read Yelp data set
-data <- data.frame(read.csv("nightlife_sanfrancisco_en.csv"), stringsAsFactors = FALSE)
+data <- read.csv("nightlife_sanfrancisco_en.csv", stringsAsFactors = FALSE)
 
 # Remove end of line
 data$text = gsub("\n", " ", data$text)
@@ -57,7 +57,7 @@ corp = tm_map(corp, content_transformer(rename_nbr))
       corp_modif = DocumentTermMatrix(corp, control = list(bounds = list(global = c(floor(nrow(data)*0.005), Inf))))
     # or ALTERNATIVELY
     # create weighting document term matrix and delete terms which are in less than 4 documents
-      corp_modif = removeSparseTerms(DocumentTermMatrix(corp, control = list(bounds = list(global = c(4, Inf)), weighting =  function(x) weightTfIdf(x, normalize = TRUE)))) 
+      corp_modif = DocumentTermMatrix(corp, control = list(bounds = list(global = c(4, Inf)), weighting =  function(x) weightTfIdf(x, normalize = TRUE)))
       
 
 # Data overview     
