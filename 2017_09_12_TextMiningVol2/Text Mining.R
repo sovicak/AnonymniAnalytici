@@ -2,7 +2,7 @@ library(data.table)
 library(tm)
 
 # path to the folder where the data is
-path <- "D:\\Work&Education\\Anonymní Analytici\\20170718 Text mining"
+path <- "..."
 setwd(path)
 dir()
 
