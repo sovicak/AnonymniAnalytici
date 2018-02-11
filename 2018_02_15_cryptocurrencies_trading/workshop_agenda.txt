@@ -1,0 +1,19 @@
+- Live trading kryptoměn na vybraných burzách - workshop na tvorbu vlastního automatického obchodníka
+    - Prerekvizity
+        - Nainstalovaný Python
+        - Balíčky pandas, numpy, talib atd.
+        - "Zprovozněný" catalyst - https://enigmampc.github.io/catalyst/install.html až do bodu 5.
+        - Založený účet na burze Bitrex - https://bittrex.com/ . Nepotřebujete pokud chcete provádět pouze backtesting svých algoritmů
+
+    - Agenda
+        - Úvod do kryptoměn bez zabrušování do technických detailů blockchainu
+        - Co "hýbe s kurzem"
+        - Jednoduchá technická analýza křivek kurzů - python balíček talib
+        - Jak je na investici kryptoměn možné vydělat i když neumíte programovat
+        - Jak je na investici do kryptoměn možné vydělat když umíte programovat
+        - Enigma - protokol, který umožňuje sdílené zpracování úloh
+        - Catalyst - python balíček umožňující obchodování na burze
+        - Catalyst - vhled do jednoduchého algoritmu, seznámení s daty + backtesting mód
+        - Catalyst - algoritmus který už dává smysl + backtesting
+        - Catalyst - live trading
+        - Catalyst - sdílení obchodních strategií https://enigma.co/catalyst#/
